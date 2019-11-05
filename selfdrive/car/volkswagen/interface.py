@@ -60,7 +60,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerLimitAlert = False
 
       # Additional common MQB parameters that may be overridden per-vehicle
-      ret.steerRateCost = 0.5
+      ret.steerRateCost = 0.6
       ret.steerActuatorDelay = 0.05 # Hopefully all MQB racks are similar here
       ret.steerMaxBP = [0.]  # m/s
       ret.steerMaxV = [1.]
@@ -71,8 +71,8 @@ class CarInterface(CarInterfaceBase):
       # HCA assist torque, but if they're good breakpoints for the driver,
       # they're probably good breakpoints for HCA as well. OP won't be driving
       # 250kph/155mph but it provides interpolation scaling above 100kmh/62mph.
-      ret.lateralTuning.pid.kpBP = [0., 15 * CV.KPH_TO_MS, 50 * CV.KPH_TO_MS]
-      ret.lateralTuning.pid.kiBP = [0., 15 * CV.KPH_TO_MS, 50 * CV.KPH_TO_MS]
+      ret.lateralTuning.pid.kpBP = [0., 15 * CV.KPH_TO_MS, 50 * CV.KPH_TO_MS, 100 * CV.KPH_TO_MS, 250 * CV.KPH_TO_MS]
+      ret.lateralTuning.pid.kiBP = [0., 15 * CV.KPH_TO_MS, 50 * CV.KPH_TO_MS, 100 * CV.KPH_TO_MS, 250 * CV.KPH_TO_MS]
 
       # FIXME: Per-vehicle parameters need to be reintegrated.
       # For the time being, per-vehicle stuff is being archived since we
@@ -80,13 +80,13 @@ class CarInterface(CarInterfaceBase):
       # averaged params should work reasonably on a range of cars. Owners
       # can tweak here, as needed, until we have car type auto-detection.
 
-      ret.mass = 1700 + STD_CARGO_KG
-      ret.wheelbase = 2.75
-      ret.centerToFront = ret.wheelbase * 0.45
-      ret.steerRatio = 15.6
+      ret.mass = 2042 # Atlas
+      ret.wheelbase = 2.97 # Atlas
+      ret.centerToFront = ret.wheelbase * 0.5
+      ret.steerRatio = 16.3
       ret.lateralTuning.pid.kf = 0.00006
-      ret.lateralTuning.pid.kpV = [0.15, 0.25, 0.60]
-      ret.lateralTuning.pid.kiV = [0.05, 0.05, 0.05]
+      ret.lateralTuning.pid.kpV = [0.05, 0.10, 0.20, 0.35, 0.50]
+      ret.lateralTuning.pid.kiV = [0.20, 0.15, 0.10, 0.05, 0.05]
       tire_stiffness_factor = 0.6
 
     ret.enableCamera = True # Stock camera detection doesn't apply to VW
