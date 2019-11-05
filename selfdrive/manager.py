@@ -498,7 +498,6 @@ def main():
   params.manager_start()
 
   # Temporary ugly hack for Volkswagen community port
-  params.put("SafetyModelLock", str(15))
 
   # set unset params
   if params.get("CompletedTrainingVersion") is None:
