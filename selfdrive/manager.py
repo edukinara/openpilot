@@ -497,8 +497,6 @@ def main():
   params = Params()
   params.manager_start()
 
-  # Temporary ugly hack for Volkswagen community port
-
   # set unset params
   if params.get("CompletedTrainingVersion") is None:
     params.put("CompletedTrainingVersion", "0")
