@@ -19,7 +19,7 @@ MESSAGING_FLAGS = -I$(BASEDIR)/selfdrive/messaging
 MESSAGING_LIBS = $(BASEDIR)/selfdrive/messaging/messaging.a
 
 CEREAL_LIBS = -l:libcapn.a
-CEREAL_OBJS = ../../cereal/gen/c/log.capnp.o
+CEREAL_OBJS = ../../cereal/gen/c/log.capnp.o ../../cereal/gen/c/car.capnp.o
 
 NANOVG_FLAGS = -I$(PHONELIBS)/nanovg
 JSON_FLAGS = -I$(PHONELIBS)/json/src
