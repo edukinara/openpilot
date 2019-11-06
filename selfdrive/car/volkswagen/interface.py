@@ -49,7 +49,7 @@ class CarInterface(CarInterfaceBase):
     ret.isPandaBlack = has_relay
     ret.carVin = vin
 
-    if candidate == CAR.GOLF:
+    if candidate == CAR.GENERICMQB:
       # Set common MQB parameters that will apply globally
       ret.carName = "volkswagen"
       ret.safetyModel = car.CarParams.SafetyModel.volkswagen
