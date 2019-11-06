@@ -90,7 +90,7 @@ class CarInterface(CarInterfaceBase):
       # ret.lateralTuning.pid.kpV = [0.05, 0.10, 0.20, 0.35, 0.50]
       # ret.lateralTuning.pid.kiV = [0.20, 0.15, 0.10, 0.05, 0.05]
       ret.lateralTuning.pid.kpV = [0.075, 0.15, 0.40]
-      ret.lateralTuning.pid.kiV = [0.025, 0.025, 0.025]
+      ret.lateralTuning.pid.kiV = [0.15, 0.10, 0.05]
       tire_stiffness_factor = 0.6
 
     ret.enableCamera = True # Stock camera detection doesn't apply to VW
