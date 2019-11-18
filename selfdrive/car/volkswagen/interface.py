@@ -88,7 +88,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 16.3
       ret.lateralTuning.pid.kf = 0.00006
       ret.lateralTuning.pid.kpV = [0.05, 0.10, 0.15, 0.25, 0.50]
-      ret.lateralTuning.pid.kiV = [0.05, 0.05, 0.05, 0.05, 0.05]
+      ret.lateralTuning.pid.kiV = [0.04, 0.04, 0.04, 0.04, 0.04]
       # ret.lateralTuning.pid.kpV = [0.10, 0.20, 0.50]
       # ret.lateralTuning.pid.kiV = [0.05, 0.05, 0.05]
       tire_stiffness_factor = 0.6
