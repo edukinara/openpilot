@@ -85,7 +85,7 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 2042 # Atlas
       ret.wheelbase = 2.97 # Atlas
       ret.centerToFront = ret.wheelbase * 0.5
-      ret.steerRatio = 16.3
+      ret.steerRatio = 15.8
       ret.lateralTuning.pid.kf = 0.00006
       ret.lateralTuning.pid.kpV = [0.05, 0.10, 0.15, 0.25, 0.50]
       ret.lateralTuning.pid.kiV = [0.05, 0.05, 0.05, 0.025, 0.025]
