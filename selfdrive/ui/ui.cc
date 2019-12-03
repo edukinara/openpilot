@@ -167,6 +167,8 @@ typedef struct UIScene {
 
   uint64_t started_ts;
 
+  bool brakeLights;
+
   // Used to show gps planner status
   bool gps_planner_active;
 } UIScene;
@@ -205,6 +207,7 @@ typedef struct UIState {
   int img_turn;
   int img_face;
   int img_map;
+  int img_brake;
 
   // Sockets
   Context *ctx;
@@ -215,6 +218,7 @@ typedef struct UIState {
   SubSocket *radarstate_sock;
   SubSocket *plus_sock;
   SubSocket *map_data_sock;
+  SubSocket *carstate_sock_raw;
   SubSocket *uilayout_sock;
   Poller * poller;
 
@@ -506,6 +510,7 @@ static void ui_init(UIState *s) {
   s->thermal_sock = SubSocket::create(s->ctx, "thermal");
   s->model_sock = SubSocket::create(s->ctx, "model");
   s->controlsstate_sock = SubSocket::create(s->ctx, "controlsState");
+  s->carstate_sock_raw = SubSocket::create(s->ctx, "carState");
   s->uilayout_sock = SubSocket::create(s->ctx, "uiLayoutState");
   s->livecalibration_sock = SubSocket::create(s->ctx, "liveCalibration");
   s->radarstate_sock = SubSocket::create(s->ctx, "radarState");
@@ -514,6 +519,7 @@ static void ui_init(UIState *s) {
                               s->thermal_sock,
                               s->model_sock,
                               s->controlsstate_sock,
+                              s->carstate_sock_raw,
                               s->uilayout_sock,
                               s->livecalibration_sock,
                               s->radarstate_sock,
@@ -558,6 +564,9 @@ static void ui_init(UIState *s) {
 
   assert(s->img_map >= 0);
   s->img_map = nvgCreateImage(s->vg, "../assets/img_map.png", 1);
+
+  assert(s->img_brake >= 0);
+  s->img_brake = nvgCreateImage(s->vg, "../assets/img_brake_disc.png", 1);
 
   // init gl
   s->frame_program = load_program(frame_vertex_shader, frame_fragment_shader);
@@ -1330,7 +1339,7 @@ static void ui_draw_vision_event(UIState *s) {
 static void ui_draw_vision_map(UIState *s) {
   const UIScene *scene = &s->scene;
   const int map_size = 96;
-  const int map_x = (scene->ui_viz_rx + (map_size * 3) + (bdr_s * 3));
+  const int map_x = (scene->ui_viz_rx + (map_size * 5) + (bdr_s * 4));
   const int map_y = (footer_y + ((footer_h - map_size) / 2));
   const int map_img_size = (map_size * 1.5);
   const int map_img_x = (map_x - (map_img_size / 2));
@@ -1379,6 +1388,33 @@ static void ui_draw_vision_face(UIState *s) {
   nvgFill(s->vg);
 }
 
+static void ui_draw_vision_brake(UIState *s) {
+  const UIScene *scene = &s->scene;
+  const int brake_size = 96;
+  const int brake_x = (scene->ui_viz_rx + (brake_size * 3) + (bdr_s * 3));
+  const int brake_y = (footer_y + ((footer_h - brake_size) / 2));
+  const int brake_img_size = (brake_size * 1.5);
+  const int brake_img_x = (brake_x - (brake_img_size / 2));
+  const int brake_img_y = (brake_y - (brake_size / 4));
+
+  bool brake_valid = scene->brakeLights;
+  float brake_img_alpha = brake_valid ? 1.0f : 0.15f;
+  float brake_bg_alpha = brake_valid ? 0.3f : 0.1f;
+  NVGcolor brake_bg = nvgRGBA(0, 0, 0, (255 * brake_bg_alpha));
+  NVGpaint brake_img = nvgImagePattern(s->vg, brake_img_x, brake_img_y,
+    brake_img_size, brake_img_size, 0, s->img_brake, brake_img_alpha);
+
+  nvgBeginPath(s->vg);
+  nvgCircle(s->vg, brake_x, (brake_y + (bdr_s * 1.5)), brake_size);
+  nvgFillColor(s->vg, brake_bg);
+  nvgFill(s->vg);
+
+  nvgBeginPath(s->vg);
+  nvgRect(s->vg, brake_img_x, brake_img_y, brake_img_size, brake_img_size);
+  nvgFillPaint(s->vg, brake_img);
+  nvgFill(s->vg);
+}
+
 static void ui_draw_vision_header(UIState *s) {
   const UIScene *scene = &s->scene;
   int ui_viz_rx = scene->ui_viz_rx;
@@ -1411,6 +1447,7 @@ static void ui_draw_vision_footer(UIState *s) {
   nvgRect(s->vg, ui_viz_rx, footer_y, ui_viz_rw, footer_h);
 
   ui_draw_vision_face(s);
+  ui_draw_vision_brake(s);
 
 #ifdef SHOW_SPEEDLIMIT
   // ui_draw_vision_map(s);
@@ -1771,6 +1808,10 @@ void handle_message(UIState *s, Message * msg) {
     struct cereal_LiveMapData datad;
     cereal_read_LiveMapData(&datad, eventd.liveMapData);
     s->scene.map_valid = datad.mapValid;
+  } else if (eventd.which == cereal_Event_carState) {
+    struct cereal_CarState datad;
+    cereal_read_CarState(&datad, eventd.carState);
+    s->scene.brakeLights = datad.brakeLights;
   }
   capn_free(&ctx);
 }
