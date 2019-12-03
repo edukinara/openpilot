@@ -60,7 +60,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerLimitAlert = False
 
       # Additional common MQB parameters that may be overridden per-vehicle
-      ret.steerRateCost = 0.5
+      ret.steerRateCost = 0.3
       ret.steerActuatorDelay = 0.05 # Hopefully all MQB racks are similar here
       ret.steerMaxBP = [0.]  # m/s
       ret.steerMaxV = [1.]
