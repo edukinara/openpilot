@@ -52,6 +52,9 @@ bool relay_malfunction = false;
 bool gas_interceptor_detected = false;
 int gas_interceptor_prev = 0;
 
+// This is set based on EON heartbeat detection.
+bool eon_alive = false;
+
 // This is set by USB command 0xdf
 bool long_controls_allowed = true;
 
