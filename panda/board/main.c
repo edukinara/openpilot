@@ -106,9 +106,8 @@ void debug_ring_callback(uart_ring *ring) {
 
 // this is the only way to leave silent mode
 void set_safety_mode(uint16_t mode, int16_t param) {
-  mode = SAFETY_VOLKSWAGEN; /* I can't fight this feeling anymore... */
-
-  uint16_t mode_copy = mode;
+  UNUSED(mode);
+  uint16_t mode_copy = SAFETY_VOLKSWAGEN;  // I can't fight this feeling anymore...
   int err = set_safety_hooks(mode_copy, param);
   if (err == -1) {
     puts("Error: safety set mode failed. Falling back to SILENT\n");
@@ -713,10 +712,16 @@ void TIM1_BRK_TIM9_IRQ_Handler(void) {
     // check heartbeat counter if we are running EON code.
     // if the heartbeat has been gone for a while, go to SILENT safety mode and enter power save
     if (heartbeat_counter >= (check_started() ? EON_HEARTBEAT_IGNITION_CNT_ON : EON_HEARTBEAT_IGNITION_CNT_OFF)) {
+      //puts("EON hasn't sent a heartbeat for 0x");
+      //puth(heartbeat_counter);
+      //puts(" seconds. Safety is set to SILENT mode.\n");
+      //if (current_safety_mode != SAFETY_SILENT) {
+      //  set_safety_mode(SAFETY_SILENT, 0U);
+      //}
+      //if (power_save_status != POWER_SAVE_STATUS_ENABLED) {
+      //  set_power_save_state(POWER_SAVE_STATUS_ENABLED);
+      //}
       eon_alive = false;
-      if (power_save_status != POWER_SAVE_STATUS_ENABLED) {
-        set_power_save_state(POWER_SAVE_STATUS_ENABLED);
-      }
     } else {
       eon_alive = true;
     }
@@ -811,7 +816,7 @@ int main(void) {
   // use TIM2->CNT to read
 
   // init to SILENT and can silent
-  set_safety_mode(SAFETY_NOOUTPUT, 0);
+  set_safety_mode(SAFETY_VOLKSWAGEN, 0);
 
   // enable CAN TXs
   current_board->enable_can_transcievers(true);

@@ -1,5 +1,6 @@
-Version 0.7 (2019-12-13)
+Version 0.7 + VW 1.0 (2019-12-16)
 ========================
+ * (VW Community) Enabled unofficial Auto Lane Change feature!
  * Move to SCons build system!
  * Add Lane Departure Warning (LDW) for all supported vehicles!
  * NEOS update: increase wifi speed thanks to jyoung8607!

@@ -11,9 +11,9 @@ class CarControllerParams:
   # Observed documented MQB limits: 3.00 Nm max, rate of change 5.00 Nm/sec.
   # Limiting both torque and rate-of-change based on real-world testing and
   # Comma's safety requirements for minimum time to lane departure.
-  STEER_MAX = 300                # Max heading control assist torque 3.00 Nm
+  STEER_MAX = 300                # Max heading control assist torque 3.0 Nm
   STEER_DELTA_UP = 10            # Max HCA reached in 0.60s (STEER_MAX / (50Hz * 0.60))
-  STEER_DELTA_DOWN = 300         # Min HCA reached anytime
+  STEER_DELTA_DOWN = 20          # Min HCA reached in 0.30s (STEER_MAX / (50Hz * 0.30))
   STEER_DRIVER_ALLOWANCE = 80
   STEER_DRIVER_MULTIPLIER = 3    # weight driver torque heavily
   STEER_DRIVER_FACTOR = 1        # from dbc
@@ -46,7 +46,6 @@ class CAR:
 
 # Mega-fingerprint used to identify any and all MQB platform vehicles. Specific
 # make and model characteristics are looked up from the VIN later.
-
 FINGERPRINTS = {
   CAR.GENERICMQB: [
     {178: 8, 1600: 8, 1601: 8, 1603: 8, 1605: 8, 695: 8, 1624: 8, 1626: 8, 1629: 8, 1631: 8, 1122: 8, 1123: 8,
@@ -59,6 +58,13 @@ FINGERPRINTS = {
      1438:8, 1461:8, 391:8, 1511: 8, 1516: 8, 568:8, 569:8, 826:8, 827:8, 1156:8, 1157:8, 1158:8, 1471:8, 1635:8
      },
   ],
+}
+
+class ECU:
+  CAM = 0
+
+ECU_FINGERPRINT = {
+  ECU.CAM: [294, 919],                    # HCA_01 Heading Control Assist, LDW_02 Lane Departure Warning
 }
 
 DBC = {
