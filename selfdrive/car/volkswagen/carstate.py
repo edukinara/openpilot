@@ -44,9 +44,9 @@ def get_mqb_pt_can_parser(CP, canbus):
     ("KBI_MFA_v_Einheit_02", "Einheiten_01", 0),  # MPH vs KMH speed display
     ("KBI_Handbremse", "Kombi_01", 0),            # Manual handbrake applied
     ("TSK_Fahrzeugmasse_02", "Motor_16", 0),      # Estimated vehicle mass from drivetrain coordinator
-    ("ACC_Status_ACC", "ACC_06", 0),              # ACC engagement status
-    ("ACC_Typ", "ACC_06", 0),                     # ACC type (follow to stop, stop&go)
-    ("SetSpeed", "ACC_02", 0),                    # ACC set speed
+    # ("ACC_Status_ACC", "ACC_06", 0),              # ACC engagement status
+    # ("ACC_Typ", "ACC_06", 0),                     # ACC type (follow to stop, stop&go)
+    # ("SetSpeed", "ACC_02", 0),
     ("GRA_Hauptschalter", "GRA_ACC_01", 0),       # ACC button, on/off
     ("GRA_Abbrechen", "GRA_ACC_01", 0),           # ACC button, cancel
     ("GRA_Tip_Setzen", "GRA_ACC_01", 0),          # ACC button, set
@@ -67,10 +67,10 @@ def get_mqb_pt_can_parser(CP, canbus):
     ("ESP_19", 100),      # From J104 ABS/ESP controller
     ("ESP_05", 50),       # From J104 ABS/ESP controller
     ("ESP_21", 50),       # From J104 ABS/ESP controller
-    ("ACC_06", 50),       # From J428 ACC radar control module
+    # ("ACC_06", 50),       # From J428 ACC radar control module
     ("Motor_20", 50),     # From J623 Engine control module
     ("GRA_ACC_01", 33),   # From J??? steering wheel control buttons
-    ("ACC_02", 17),       # From J428 ACC radar control module
+    # ("ACC_02", 17),       # From J428 ACC radar control module
     ("Getriebe_11", 20),  # From J743 Auto transmission control module
     ("Gateway_72", 10),   # From J533 CAN gateway (aggregated data)
     ("Motor_14", 10),     # From J623 Engine control module
@@ -90,11 +90,16 @@ def get_mqb_cam_can_parser(CP, canbus):
   signals = [
     # sig_name, sig_address, default
     ("Kombi_Lamp_Green", "LDW_02", 0),            # Lane Assist status LED
+    ("ACC_Status_ACC", "ACC_06", 0),                          # ACC engagement status
+    ("ACC_Typ", "ACC_06", 0),                                 # ACC type (follow to stop, stop&go)
+    ("SetSpeed", "ACC_02", 0),
   ]
 
   checks = [
     # sig_address, frequency
-    ("LDW_02", 10)        # From R242 Driver assistance camera
+    ("LDW_02", 10),        # From R242 Driver assistance camera
+    ("ACC_06", 50),                                           # From J428 ACC radar control module
+    ("ACC_02", 17),
   ]
 
   return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, canbus.cam)
@@ -127,7 +132,7 @@ class CarState():
                          C=[1., 0.],
                          K=[[0.12287673], [0.29666309]])
 
-  def update(self, pt_cp):
+  def update(self, pt_cp, cam_cp):
     # Update vehicle speed and acceleration from ABS wheel speeds.
     self.wheelSpeedFL = pt_cp.vl["ESP_19"]['ESP_VL_Radgeschw_02'] * CV.KPH_TO_MS
     self.wheelSpeedFR = pt_cp.vl["ESP_19"]['ESP_VR_Radgeschw_02'] * CV.KPH_TO_MS
@@ -175,7 +180,7 @@ class CarState():
     self.displayMetricUnits = not pt_cp.vl["Einheiten_01"]["KBI_MFA_v_Einheit_02"]
 
     # Update ACC radar status.
-    accStatus = pt_cp.vl["ACC_06"]['ACC_Status_ACC']
+    accStatus = cam_cp.vl["ACC_06"]['ACC_Status_ACC']
     if accStatus == 1:
       # ACC okay but disabled
       self.accFault = False
@@ -199,7 +204,7 @@ class CarState():
 
     # Update ACC setpoint. When the setpoint is zero or there's an error, the
     # radar sends a set-speed of ~90.69 m/s / 203mph.
-    self.accSetSpeed = pt_cp.vl["ACC_02"]['SetSpeed']
+    self.accSetSpeed = cam_cp.vl["ACC_02"]['SetSpeed']
     if self.accSetSpeed > 90: self.accSetSpeed = 0
 
     # Update control button states for turn signals and ACC controls.
