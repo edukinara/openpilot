@@ -55,6 +55,13 @@ class PathPlanner():
     self.lane_change_timer = 0.0
     self.prev_one_blinker = False
 
+    # LC
+    self.ed_assisted_lc_enabled = False
+    self.ed_auto_lc_enabled = False
+    self.ed_auto_lc_allowed = False
+    self.ed_auto_lc_timer = None
+    self.last_ts = 0.
+
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
     self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, self.steer_rate_cost)
@@ -72,6 +79,13 @@ class PathPlanner():
     self.angle_steers_des_time = 0.0
 
   def update(self, sm, pm, CP, VM):
+    # LC
+    cur_time = sec_since_boot()
+    if cur_time - self.last_ts > 5.:
+      self.ed_assisted_lc_enabled = True
+      self.ed_auto_lc_enabled = True
+      self.last_ts = cur_time
+
     v_ego = sm['carState'].vEgo
     angle_steers = sm['carState'].steeringAngle
     active = sm['controlsState'].active
@@ -89,7 +103,11 @@ class PathPlanner():
     lane_change_direction = LaneChangeDirection.none
     one_blinker = sm['carState'].leftBlinker != sm['carState'].rightBlinker
 
-    if not active or self.lane_change_timer > 10.0:
+    if not active:
+      self.lane_change_state = LaneChangeState.off
+    elif active and self.ed_auto_lc_enabled and self.lane_change_timer > 13.0:
+      self.lane_change_state = LaneChangeState.off
+    elif active and self.lane_change_timer > 10.0:
       self.lane_change_state = LaneChangeState.off
     else:
       if sm['carState'].leftBlinker:
@@ -104,9 +122,32 @@ class PathPlanner():
 
       lane_change_prob = self.LP.l_lane_change_prob + self.LP.r_lane_change_prob
 
+      # LC
+      if self.ed_assisted_lc_enabled:
+        # we allow auto lc when speed is > 55mph / 96.5kph
+        if self.ed_auto_lc_enabled and v_ego >= 55 * CV.MPH_TO_MS:
+          self.ed_auto_lc_allowed = True
+
+          if self.ed_auto_lc_timer is None:
+            # we only set timer when in preLaneChange state, 2 secs delay
+            if self.lane_change_state == LaneChangeState.preLaneChange:
+              self.ed_auto_lc_timer = cur_time + 2.
+          else:
+            # if timer is up, we set torque_applied to True to fake user input
+            if cur_time > self.ed_auto_lc_timer:
+              torque_applied = True
+        else:
+          # if too slow, we reset all the variables
+          self.ed_auto_lc_allowed = False
+          self.ed_auto_lc_timer = None
+
+      # we reset the timers when torque is applied regardless
+      if torque_applied:
+        self.ed_auto_lc_timer = None
+
       # State transitions
       # off
-      if self.lane_change_state == LaneChangeState.off and one_blinker and not self.prev_one_blinker:
+      if self.ed_assisted_lc_enabled and self.lane_change_state == LaneChangeState.off and one_blinker and not self.prev_one_blinker:
         self.lane_change_state = LaneChangeState.preLaneChange
 
       # pre
@@ -122,8 +163,10 @@ class PathPlanner():
       # finishing
       elif self.lane_change_state == LaneChangeState.laneChangeFinishing and lane_change_prob < 0.2:
         self.lane_change_state = LaneChangeState.preLaneChange
+        # when finishing, we reset timer to none.
+        self.ed_auto_lc_timer = None
 
-      # Don't allow starting lane change below 45 mph
+      # Don't allow starting lane change below 35 mph
       if (v_ego < 35 * CV.MPH_TO_MS) and (self.lane_change_state == LaneChangeState.preLaneChange):
         self.lane_change_state = LaneChangeState.off
 
