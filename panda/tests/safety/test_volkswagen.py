@@ -5,8 +5,8 @@ from panda import Panda
 from panda.tests.safety import libpandasafety_py
 from panda.tests.safety.common import test_relay_malfunction, make_msg, test_manually_enable_controls_allowed, test_spam_can_buses
 
-MAX_RATE_UP = 10
-MAX_RATE_DOWN = 300
+MAX_RATE_UP = 4
+MAX_RATE_DOWN = 10
 MAX_STEER = 300
 
 MAX_RT_DELTA = 188

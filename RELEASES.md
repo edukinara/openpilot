@@ -1,6 +1,8 @@
-Version 0.7 + VW 1.0 (2019-12-16)
+Version 0.7 + VW 1.1 (2020-01-01)
 ========================
- * (VW Community) Enabled unofficial Auto Lane Change feature!
+ * (VW Community) Enabled Comma's unofficial Lane Change Assist feature!
+ * (VW Community) Advanced Virtual Relay Technology!
+ * (VW Community) Closer alignment with Comma recommended safety parameters
  * Move to SCons build system!
  * Add Lane Departure Warning (LDW) for all supported vehicles!
  * NEOS update: increase wifi speed thanks to jyoung8607!

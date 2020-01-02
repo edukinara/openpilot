@@ -7,10 +7,10 @@
 #define MSG_LDW_02              0x397
 
 const int VOLKSWAGEN_MAX_STEER = 300;               // 3.0 Nm (EPS side max of 3.0Nm with fault if violated)
-const int VOLKSWAGEN_MAX_RT_DELTA = 188;            // 10 max rate * 50Hz send rate * 250000 RT interval / 1000000 = 125 ; 125 * 1.5 for safety pad = 187.5
+const int VOLKSWAGEN_MAX_RT_DELTA = 75;             // 4 max rate up * 50Hz send rate * 250000 RT interval / 1000000 = 50 ; 50 * 1.5 for safety pad = 75
 const uint32_t VOLKSWAGEN_RT_INTERVAL = 250000;     // 250ms between real time checks
-const int VOLKSWAGEN_MAX_RATE_UP = 10;              // 5.0 Nm/s available rate of change from the steering rack (EPS side delta-limit of 5.0 Nm/s)
-const int VOLKSWAGEN_MAX_RATE_DOWN = 20;            // Arbitrary rate of change available on reduction
+const int VOLKSWAGEN_MAX_RATE_UP = 4;               // 2.0 Nm/s available rate of change from the steering rack (EPS side delta-limit of 5.0 Nm/s)
+const int VOLKSWAGEN_MAX_RATE_DOWN = 10;            // 5.0 Nm/s available rate of change from the steering rack (EPS side delta-limit of 5.0 Nm/s)
 const int VOLKSWAGEN_DRIVER_TORQUE_ALLOWANCE = 80;
 const int VOLKSWAGEN_DRIVER_TORQUE_FACTOR = 3;
 
@@ -56,15 +56,9 @@ static void volkswagen_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     volkswagen_gas_prev = gas;
   }
 
-  // ISTM the relay_malfunction check should be contingent on actually having
-  // a relay. For now, this new check is hurting our fail-to-transparency
-  // check for J533-integrated Grey/White Panda users. Probably should migrate
-  // to a safety_defaults transparent forwarding mode instead of locking VW
-  // safety mode all the time.
-  //
-  // if ((safety_mode_cnt > RELAY_TRNS_TIMEOUT) && (bus == 0) && (addr == MSG_HCA_01)) {
-  //   relay_malfunction = true;
-  // }
+  if ((safety_mode_cnt > RELAY_TRNS_TIMEOUT) && (bus == 0) && (addr == MSG_HCA_01)) {
+    relay_malfunction = true;
+  }
 }
 
 static int volkswagen_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
@@ -157,7 +151,7 @@ static int volkswagen_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
         bus_fwd = 2;
         break;
       case 2:
-        if (eon_alive && ((addr == MSG_HCA_01) || (addr == MSG_LDW_02))) {
+        if ((addr == MSG_HCA_01) || (addr == MSG_LDW_02)) {
           // OP takes control of the Heading Control Assist and Lane Departure Warning messages from the camera.
           bus_fwd = -1;
         } else {

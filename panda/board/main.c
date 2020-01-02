@@ -106,8 +106,7 @@ void debug_ring_callback(uart_ring *ring) {
 
 // this is the only way to leave silent mode
 void set_safety_mode(uint16_t mode, int16_t param) {
-  UNUSED(mode);
-  uint16_t mode_copy = SAFETY_VOLKSWAGEN;  // I can't fight this feeling anymore...
+  uint16_t mode_copy = mode;
   int err = set_safety_hooks(mode_copy, param);
   if (err == -1) {
     puts("Error: safety set mode failed. Falling back to SILENT\n");
@@ -123,10 +122,17 @@ void set_safety_mode(uint16_t mode, int16_t param) {
   switch (mode_copy) {
     case SAFETY_SILENT:
       set_intercept_relay(false);
+      // Volkswagen community port:
+      // J533 integrations with White/Grey Panda really need Panda to respond
+      // at all times. Let the CAN transceivers ACK traffic unless this is
+      // BP/Uno where the physical relay makes it irrelevant. This makes
+      // SILENT identical to NOOUTPUT for White/Grey Panda.
       if (board_has_obd()) {
         current_board->set_can_mode(CAN_MODE_NORMAL);
+        can_silent = ALL_CAN_SILENT;
+      } else {
+        can_silent = ALL_CAN_LIVE;
       }
-      can_silent = ALL_CAN_SILENT;
       break;
     case SAFETY_NOOUTPUT:
       set_intercept_relay(false);
@@ -712,18 +718,15 @@ void TIM1_BRK_TIM9_IRQ_Handler(void) {
     // check heartbeat counter if we are running EON code.
     // if the heartbeat has been gone for a while, go to SILENT safety mode and enter power save
     if (heartbeat_counter >= (check_started() ? EON_HEARTBEAT_IGNITION_CNT_ON : EON_HEARTBEAT_IGNITION_CNT_OFF)) {
-      //puts("EON hasn't sent a heartbeat for 0x");
-      //puth(heartbeat_counter);
-      //puts(" seconds. Safety is set to SILENT mode.\n");
-      //if (current_safety_mode != SAFETY_SILENT) {
-      //  set_safety_mode(SAFETY_SILENT, 0U);
-      //}
-      //if (power_save_status != POWER_SAVE_STATUS_ENABLED) {
-      //  set_power_save_state(POWER_SAVE_STATUS_ENABLED);
-      //}
-      eon_alive = false;
-    } else {
-      eon_alive = true;
+      puts("EON hasn't sent a heartbeat for 0x");
+      puth(heartbeat_counter);
+      puts(" seconds. Safety is set to SILENT mode.\n");
+      if (current_safety_mode != SAFETY_SILENT) {
+        set_safety_mode(SAFETY_SILENT, 0U);
+      }
+      if (power_save_status != POWER_SAVE_STATUS_ENABLED) {
+        set_power_save_state(POWER_SAVE_STATUS_ENABLED);
+      }
     }
 
     // enter CDP mode when car starts to ensure we are charging a turned off EON
@@ -816,7 +819,7 @@ int main(void) {
   // use TIM2->CNT to read
 
   // init to SILENT and can silent
-  set_safety_mode(SAFETY_VOLKSWAGEN, 0);
+  set_safety_mode(SAFETY_SILENT, 0);
 
   // enable CAN TXs
   current_board->enable_can_transcievers(true);
