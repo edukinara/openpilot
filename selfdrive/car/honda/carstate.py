@@ -2,8 +2,8 @@ from cereal import car
 from collections import defaultdict
 from common.numpy_fast import interp
 from common.kalman.simple_kalman import KF1D
-from selfdrive.can.can_define import CANDefine
-from selfdrive.can.parser import CANParser
+from opendbc.can.can_define import CANDefine
+from opendbc.can.parser import CANParser
 from selfdrive.config import Conversions as CV
 from selfdrive.car.honda.values import CAR, DBC, STEER_THRESHOLD, SPEED_FACTOR, HONDA_BOSCH
 
@@ -41,8 +41,8 @@ def get_can_signals(CP):
       ("WHEEL_SPEED_RR", "WHEEL_SPEEDS", 0),
       ("STEER_ANGLE", "STEERING_SENSORS", 0),
       ("STEER_ANGLE_RATE", "STEERING_SENSORS", 0),
+      ("MOTOR_TORQUE", "STEER_MOTOR_TORQUE", 0),
       ("STEER_TORQUE_SENSOR", "STEER_STATUS", 0),
-      ("STEER_TORQUE_MOTOR", "STEER_STATUS", 0),
       ("LEFT_BLINKER", "SCM_FEEDBACK", 0),
       ("RIGHT_BLINKER", "SCM_FEEDBACK", 0),
       ("GEAR", "GEARBOX", 0),
@@ -170,6 +170,20 @@ def get_can_parser(CP):
 
 def get_cam_can_parser(CP):
   signals = []
+
+  if CP.carFingerprint in HONDA_BOSCH:
+    signals += [("ACCEL_COMMAND", "ACC_CONTROL", 0),
+                ("AEB_STATUS", "ACC_CONTROL", 0)]
+  else:
+    signals += [("COMPUTER_BRAKE", "BRAKE_COMMAND", 0),
+                ("AEB_REQ_1", "BRAKE_COMMAND", 0),
+                ("FCW", "BRAKE_COMMAND", 0),
+                ("CHIME", "BRAKE_COMMAND", 0),
+                ("FCM_OFF", "ACC_HUD", 0),
+                ("FCM_OFF_2", "ACC_HUD", 0),
+                ("FCM_PROBLEM", "ACC_HUD", 0),
+                ("ICONS", "ACC_HUD", 0)]
+
 
   # all hondas except CRV, RDX and 2019 Odyssey@China use 0xe4 for steering
   checks = [(0xe4, 100)]
@@ -311,7 +325,7 @@ class CarState():
       self.car_gas = cp.vl["GAS_PEDAL_2"]['CAR_GAS']
 
     self.steer_torque_driver = cp.vl["STEER_STATUS"]['STEER_TORQUE_SENSOR']
-    self.steer_torque_motor = cp.vl["STEER_STATUS"]['STEER_TORQUE_MOTOR']
+    self.steer_torque_motor = cp.vl["STEER_MOTOR_TORQUE"]['MOTOR_TORQUE']
     self.steer_override = abs(self.steer_torque_driver) > STEER_THRESHOLD[self.CP.carFingerprint]
 
     self.brake_switch = cp.vl["POWERTRAIN_DATA"]['BRAKE_SWITCH']
@@ -354,3 +368,16 @@ class CarState():
 
     # TODO: discover the CAN msg that has the imperial unit bit for all other cars
     self.is_metric = not cp.vl["HUD_SETTING"]['IMPERIAL_UNIT'] if self.CP.carFingerprint in (CAR.CIVIC) else False
+
+    if self.CP.carFingerprint in HONDA_BOSCH:
+      self.stock_aeb = bool(cp_cam.vl["ACC_CONTROL"]["AEB_STATUS"] and cp_cam.vl["ACC_CONTROL"]["ACCEL_COMMAND"] < -1e-5)
+    else:
+      self.stock_aeb = bool(cp_cam.vl["BRAKE_COMMAND"]["AEB_REQ_1"] and cp_cam.vl["BRAKE_COMMAND"]["COMPUTER_BRAKE"] > 1e-5)
+
+    if self.CP.carFingerprint in HONDA_BOSCH:
+      self.stock_hud = False
+      self.stock_fcw = False
+    else:
+      self.stock_fcw = bool(cp_cam.vl["BRAKE_COMMAND"]["FCW"] != 0)
+      self.stock_hud = cp_cam.vl["ACC_HUD"]
+      self.stock_brake = cp_cam.vl["BRAKE_COMMAND"]

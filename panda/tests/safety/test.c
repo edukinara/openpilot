@@ -42,13 +42,10 @@ TIM_TypeDef *TIM2 = &timer;
 #define HW_TYPE_PEDAL 4U
 #define HW_TYPE_UNO 5U
 
+#define ALLOW_DEBUG
+
 // from main_declarations.h
 uint8_t hw_type = HW_TYPE_UNKNOWN;
-
-// from board.h
-bool board_has_relay(void) {
-  return hw_type == HW_TYPE_BLACK_PANDA || hw_type == HW_TYPE_UNO;
-}
 
 // from config.h
 #define MIN(a,b)                                \
@@ -80,8 +77,8 @@ void set_controls_allowed(bool c){
   controls_allowed = c;
 }
 
-void set_long_controls_allowed(bool c){
-  long_controls_allowed = c;
+void set_relay_malfunction(bool c){
+  relay_malfunction = c;
 }
 
 void set_gas_interceptor_detected(bool c){
@@ -96,8 +93,8 @@ bool get_controls_allowed(void){
   return controls_allowed;
 }
 
-bool get_long_controls_allowed(void){
-  return long_controls_allowed;
+bool get_relay_malfunction(void){
+  return relay_malfunction;
 }
 
 bool get_gas_interceptor_detected(void){
@@ -114,10 +111,6 @@ int get_hw_type(void){
 
 void set_timer(uint32_t t){
   timer.CNT = t;
-}
-
-void set_toyota_camera_forwarded(int t){
-  toyota_camera_forwarded = t;
 }
 
 void set_toyota_torque_meas(int min, int max){
@@ -138,18 +131,6 @@ void set_gm_torque_driver(int min, int max){
 void set_hyundai_torque_driver(int min, int max){
   hyundai_torque_driver.min = min;
   hyundai_torque_driver.max = max;
-}
-
-void set_hyundai_camera_bus(int t){
-  hyundai_camera_bus = t;
-}
-
-void set_hyundai_giraffe_switch_2(int t){
-  hyundai_giraffe_switch_2 = t;
-}
-
-void set_chrysler_camera_detected(int t){
-  chrysler_camera_detected = t;
 }
 
 void set_chrysler_torque_meas(int min, int max){
@@ -263,12 +244,12 @@ void set_honda_alt_brake_msg(bool c){
   honda_alt_brake_msg = c;
 }
 
-void set_honda_bosch_hardware(bool c){
-  honda_bosch_hardware = c;
+void set_honda_hw(int c){
+  honda_hw = c;
 }
 
-int get_honda_bosch_hardware(void) {
-  return honda_bosch_hardware;
+int get_honda_hw(void) {
+  return honda_hw;
 }
 
 void set_honda_fwd_brake(bool c){
@@ -278,6 +259,7 @@ void set_honda_fwd_brake(bool c){
 void init_tests(void){
   // get HW_TYPE from env variable set in test.sh
   hw_type = atoi(getenv("HW_TYPE"));
+  safety_mode_cnt = 2U;  // avoid ignoring relay_malfunction logic
 }
 
 void init_tests_toyota(void){

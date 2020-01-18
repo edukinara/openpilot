@@ -25,7 +25,10 @@
 #include <zmq.h>
 #include <yaml-cpp/yaml.h>
 #include <capnp/serialize.h>
+
+#ifdef QCOM
 #include <cutils/properties.h>
+#endif
 
 #include "common/version.h"
 #include "common/timing.h"
@@ -37,6 +40,11 @@
 
 #include "logger.h"
 #include "messaging.hpp"
+
+#ifndef QCOM
+// no encoder on PC
+#define DISABLE_ENCODER
+#endif
 
 
 #ifndef DISABLE_ENCODER
@@ -109,6 +117,7 @@ void encoder_thread(bool is_streaming, bool raw_clips, bool front) {
   int cnt = 0;
 
   PubSocket *idx_sock = PubSocket::create(s.ctx, front ? "frontEncodeIdx" : "encodeIdx");
+  assert(idx_sock != NULL);
 
   LoggerHandle *lh = NULL;
 
@@ -419,6 +428,7 @@ kj::Array<capnp::word> gen_init_data() {
 
   init.setKernelVersion(util::read_file("/proc/version"));
 
+#ifdef QCOM
   {
     std::vector<std::pair<std::string, std::string> > properties;
     property_list(append_property, (void*)&properties);
@@ -430,6 +440,7 @@ kj::Array<capnp::word> gen_init_data() {
       lentry.setValue(properties[i].second);
     }
   }
+#endif
 
   const char* dongle_id = getenv("DONGLE_ID");
   if (dongle_id) {
@@ -567,7 +578,7 @@ int main(int argc, char** argv) {
   Poller * poller = Poller::create();
 
   std::string exe_dir = util::dir_name(util::readlink("/proc/self/exe"));
-  std::string service_list_path = exe_dir + "/../service_list.yaml";
+  std::string service_list_path = exe_dir + "/../../cereal/service_list.yaml";
 
   // subscribe to all services
 
@@ -585,6 +596,8 @@ int main(int argc, char** argv) {
 
     if (should_log) {
       SubSocket * sock = SubSocket::create(s.ctx, name);
+      assert(sock != NULL);
+
       poller->registerSocket(sock);
       socks.push_back(sock);
 

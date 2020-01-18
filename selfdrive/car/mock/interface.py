@@ -2,7 +2,7 @@
 from cereal import car
 from selfdrive.config import Conversions as CV
 from selfdrive.swaglog import cloudlog
-import selfdrive.messaging as messaging
+import cereal.messaging as messaging
 from selfdrive.car import gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
 
@@ -34,7 +34,7 @@ class CarInterface(CarInterfaceBase):
     return accel
 
   @staticmethod
-  def get_params(candidate, fingerprint=gen_empty_fingerprint(), vin="", has_relay=False):
+  def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]):
 
     ret = car.CarParams.new_message()
 

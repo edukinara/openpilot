@@ -38,13 +38,12 @@ class CarInterface(CarInterfaceBase):
     return float(accel) / 3.0
 
   @staticmethod
-  def get_params(candidate, fingerprint=gen_empty_fingerprint(), vin="", has_relay=False):
+  def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]):
 
     ret = car.CarParams.new_message()
 
     ret.carName = "hyundai"
     ret.carFingerprint = candidate
-    ret.carVin = vin
     ret.isPandaBlack = has_relay
     ret.radarOffCan = True
     ret.safetyModel = car.CarParams.SafetyModel.hyundai
@@ -52,6 +51,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerActuatorDelay = 0.1  # Default delay
     ret.steerRateCost = 0.5
+    ret.steerLimitTimer = 0.4
     tire_stiffness_factor = 1.
 
     if candidate == CAR.SANTA_FE:
@@ -143,7 +143,6 @@ class CarInterface(CarInterfaceBase):
     ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, ECU.CAM) or has_relay
     ret.openpilotLongitudinalControl = False
 
-    ret.steerLimitAlert = False
     ret.stoppingControl = False
     ret.startAccel = 0.0
 
@@ -159,7 +158,7 @@ class CarInterface(CarInterfaceBase):
     # create message
     ret = car.CarState.new_message()
 
-    ret.canValid = self.cp.can_valid  # TODO: check cp_cam validity
+    ret.canValid = self.cp.can_valid and self.cp_cam.can_valid
 
     # speeds
     ret.vEgo = self.CS.v_ego

@@ -34,13 +34,12 @@ class CarInterface(CarInterfaceBase):
     return float(accel) / 3.0
 
   @staticmethod
-  def get_params(candidate, fingerprint=gen_empty_fingerprint(), vin="", has_relay=False):
+  def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]):
 
     ret = car.CarParams.new_message()
 
     ret.carName = "ford"
     ret.carFingerprint = candidate
-    ret.carVin = vin
     ret.isPandaBlack = has_relay
 
     ret.safetyModel = car.CarParams.SafetyModel.ford
@@ -56,6 +55,7 @@ class CarInterface(CarInterfaceBase):
     ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.01], [0.005]]     # TODO: tune this
     ret.lateralTuning.pid.kf = 1. / MAX_ANGLE   # MAX Steer angle to normalize FF
     ret.steerActuatorDelay = 0.1  # Default delay, not measured yet
+    ret.steerLimitTimer = 0.8
     ret.steerRateCost = 1.0
     ret.centerToFront = ret.wheelbase * 0.44
     tire_stiffness_factor = 0.5328
@@ -89,7 +89,6 @@ class CarInterface(CarInterfaceBase):
     ret.openpilotLongitudinalControl = False
     cloudlog.warning("ECU Camera Simulated: %r", ret.enableCamera)
 
-    ret.steerLimitAlert = False
     ret.stoppingControl = False
     ret.startAccel = 0.0
 
