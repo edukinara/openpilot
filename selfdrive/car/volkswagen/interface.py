@@ -58,7 +58,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerControlType = car.CarParams.SteerControlType.torque
 
       # Additional common MQB parameters that may be overridden per-vehicle
-      ret.steerRateCost = 0.6
+      ret.steerRateCost = 1.0
       ret.steerActuatorDelay = 0.05 # Hopefully all MQB racks are similar here
       ret.steerLimitTimer = 0.4
       ret.steerMaxBP = [0.]  # m/s
