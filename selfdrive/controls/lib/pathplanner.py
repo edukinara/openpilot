@@ -14,6 +14,10 @@ LaneChangeDirection = log.PathPlan.LaneChangeDirection
 
 LOG_MPC = os.environ.get('LOG_MPC', False)
 
+LANE_CHANGE_SPEED_MIN = 35 * CV.MPH_TO_MS
+AUTO_LANE_CHANGE_SPEED_MIN = 55 * CV.MPH_TO_MS
+LANE_CHANGE_TIME_MAX = 10.
+
 DESIRES = {
   LaneChangeDirection.none: {
     LaneChangeState.off: log.PathPlan.Desire.none,
@@ -102,12 +106,13 @@ class PathPlanner():
     # Lane change logic
     lane_change_direction = LaneChangeDirection.none
     one_blinker = sm['carState'].leftBlinker != sm['carState'].rightBlinker
+    below_lane_change_speed = v_ego < LANE_CHANGE_SPEED_MIN
 
     if not active:
       self.lane_change_state = LaneChangeState.off
     elif active and self.ed_auto_lc_enabled and self.lane_change_timer > 13.0:
       self.lane_change_state = LaneChangeState.off
-    elif active and self.lane_change_timer > 10.0:
+    elif active and self.lane_change_timer > LANE_CHANGE_TIME_MAX:
       self.lane_change_state = LaneChangeState.off
     else:
       if sm['carState'].leftBlinker:
@@ -115,17 +120,16 @@ class PathPlanner():
       elif sm['carState'].rightBlinker:
         lane_change_direction = LaneChangeDirection.right
 
-      if lane_change_direction == LaneChangeDirection.left:
-        torque_applied = sm['carState'].steeringTorque > 0 and sm['carState'].steeringPressed
-      else:
-        torque_applied = sm['carState'].steeringTorque < 0 and sm['carState'].steeringPressed
+      torque_applied = sm['carState'].steeringPressed and \
+                       ((sm['carState'].steeringTorque > 0 and lane_change_direction == LaneChangeDirection.left) or \
+                        (sm['carState'].steeringTorque < 0 and lane_change_direction == LaneChangeDirection.right))
 
       lane_change_prob = self.LP.l_lane_change_prob + self.LP.r_lane_change_prob
 
       # LC
       if self.ed_assisted_lc_enabled:
         # we allow auto lc when speed is > 55mph / 96.5kph
-        if self.ed_auto_lc_enabled and v_ego >= 55 * CV.MPH_TO_MS:
+        if self.ed_auto_lc_enabled and v_ego >= AUTO_LANE_CHANGE_SPEED_MIN:
           self.ed_auto_lc_allowed = True
 
           if self.ed_auto_lc_timer is None:
@@ -147,14 +151,15 @@ class PathPlanner():
 
       # State transitions
       # off
-      if self.ed_assisted_lc_enabled and self.lane_change_state == LaneChangeState.off and one_blinker and not self.prev_one_blinker:
+      if self.ed_assisted_lc_enabled and self.lane_change_state == LaneChangeState.off and one_blinker and not self.prev_one_blinker and not below_lane_change_speed:
         self.lane_change_state = LaneChangeState.preLaneChange
 
       # pre
-      elif self.lane_change_state == LaneChangeState.preLaneChange and not one_blinker:
-        self.lane_change_state = LaneChangeState.off
-      elif self.lane_change_state == LaneChangeState.preLaneChange and torque_applied:
-        self.lane_change_state = LaneChangeState.laneChangeStarting
+      elif self.lane_change_state == LaneChangeState.preLaneChange:
+        if not one_blinker or below_lane_change_speed:
+          self.lane_change_state = LaneChangeState.off
+        elif torque_applied:
+          self.lane_change_state = LaneChangeState.laneChangeStarting
 
       # starting
       elif self.lane_change_state == LaneChangeState.laneChangeStarting and lane_change_prob > 0.5:
@@ -162,13 +167,10 @@ class PathPlanner():
 
       # finishing
       elif self.lane_change_state == LaneChangeState.laneChangeFinishing and lane_change_prob < 0.2:
-        self.lane_change_state = LaneChangeState.preLaneChange
-        # when finishing, we reset timer to none.
-        self.ed_auto_lc_timer = None
-
-      # Don't allow starting lane change below 35 mph
-      if (v_ego < 35 * CV.MPH_TO_MS) and (self.lane_change_state == LaneChangeState.preLaneChange):
-        self.lane_change_state = LaneChangeState.off
+        if one_blinker:
+          self.lane_change_state = LaneChangeState.preLaneChange
+        else:
+          self.lane_change_state = LaneChangeState.off
 
     if self.lane_change_state in [LaneChangeState.off, LaneChangeState.preLaneChange]:
       self.lane_change_timer = 0.0

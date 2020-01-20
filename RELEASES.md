@@ -1,4 +1,16 @@
-Version 0.7 + VW 1.1 (2020-01-01)
+Version 0.7.1 + VW 1.1 (2020-01-20)
+========================
+
+Version 0.7.1 (2020-01-20)
+========================
+ * comma two support!
+ * Lane Change Assist above 45 mph!
+ * Replace zmq with custom messaging library, msgq!
+ * Supercombo model: calibration and driving models are combined for better lead estimate
+ * More robust updater thanks to jyoung8607! Requires NEOS update
+ * Improve low speed ACC tuning
+
+Version 0.7 (2019-12-13)
 ========================
  * (VW Community) Enabled Comma's unofficial Lane Change Assist feature!
  * (VW Community) Advanced Virtual Relay Technology!
