@@ -57,7 +57,7 @@ class CarInterface(CarInterfaceBase):
       ret.steerControlType = car.CarParams.SteerControlType.torque
 
       # Additional common MQB parameters that may be overridden per-vehicle
-      ret.steerRateCost = 0.6
+      ret.steerRateCost = 1.0
       ret.steerActuatorDelay = 0.05 # Hopefully all MQB racks are similar here
       ret.steerLimitTimer = 0.4
       ret.steerMaxBP = [0.]  # m/s
@@ -78,12 +78,12 @@ class CarInterface(CarInterfaceBase):
       # averaged params should work reasonably on a range of cars. Owners
       # can tweak here, as needed, until we have car type auto-detection.
 
-      ret.mass = 2042 # Atlas
-      ret.wheelbase = 2.97 # Atlas
-      ret.centerToFront = ret.wheelbase * 0.5
-      ret.steerRatio = 15.1
+      ret.mass = 2100 # Atlas
+      ret.wheelbase = 2.98 # Atlas
+      ret.centerToFront = ret.wheelbase * 0.45
+      ret.steerRatio = 16.3
       ret.lateralTuning.pid.kf = 0.00006
-      ret.lateralTuning.pid.kpV = [0.05, 0.10, 0.15, 0.35, 0.45]
+      ret.lateralTuning.pid.kpV = [0.15, 0.25, 0.30, 0.30, 0.30]
       ret.lateralTuning.pid.kiV = [0.05, 0.05, 0.05, 0.05, 0.05]
       tire_stiffness_factor = 0.6
 
