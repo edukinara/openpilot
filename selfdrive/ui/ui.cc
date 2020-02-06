@@ -125,7 +125,8 @@ static void ui_init(UIState *s) {
                               s->controlsstate_sock,
                               s->uilayout_sock,
                               s->livecalibration_sock,
-                              s->radarstate_sock
+                              s->radarstate_sock,
+                              s->carstate_sock
                              });
 
 #ifdef SHOW_SPEEDLIMIT
