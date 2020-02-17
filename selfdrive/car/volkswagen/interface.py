@@ -76,7 +76,7 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kf = 0.00006
       # ret.lateralTuning.pid.kpV = [0.15, 0.25, 0.30, 0.30, 0.30]
       # ret.lateralTuning.pid.kiV = [0.05, 0.05, 0.05, 0.05, 0.05]
-      ret.lateralTuning.pid.kpV = [0.5]
+      ret.lateralTuning.pid.kpV = [0.45]
       ret.lateralTuning.pid.kiV = [0.25]
       tire_stiffness_factor = 1.0
 
