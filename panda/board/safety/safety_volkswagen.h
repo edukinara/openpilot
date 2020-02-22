@@ -236,6 +236,6 @@ const safety_hooks volkswagen_mqb_hooks = {
   .tx = volkswagen_tx_hook,
   .tx_lin = nooutput_tx_lin_hook,
   .fwd = volkswagen_fwd_hook,
-  .addr_check = volkswagen_mqb_rx_checks,
-  .addr_check_len = sizeof(volkswagen_mqb_rx_checks) / sizeof(volkswagen_mqb_rx_checks[0]),
+  // .addr_check = volkswagen_mqb_rx_checks,
+  // .addr_check_len = sizeof(volkswagen_mqb_rx_checks) / sizeof(volkswagen_mqb_rx_checks[0]),
 };
