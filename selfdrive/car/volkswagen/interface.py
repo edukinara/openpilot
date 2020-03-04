@@ -198,11 +198,13 @@ class CarInterface(CarInterfaceBase):
 
     # Per the Comma safety model, disable on pedals rising edge or when brake
     # is pressed and speed isn't zero.
-    if (ret.gasPressed and not self.gasPressedPrev) or \
-            (ret.brakePressed and (not self.brakePressedPrev or not ret.standstill)):
+    # if (ret.gasPressed and not self.gasPressedPrev) or \
+    #         (ret.brakePressed and (not self.brakePressedPrev or not ret.standstill)):
+    #   events.append(create_event('pedalPressed', [ET.NO_ENTRY, ET.USER_DISABLE]))
+    # if ret.gasPressed:
+    #   events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
+    if (ret.brakePressed and (not self.brakePressedPrev or not ret.standstill)):
       events.append(create_event('pedalPressed', [ET.NO_ENTRY, ET.USER_DISABLE]))
-    if ret.gasPressed:
-      events.append(create_event('pedalPressed', [ET.PRE_ENABLE]))
 
     # Engagement and longitudinal control using stock ACC. Make sure OP is
     # disengaged if stock ACC is disengaged.
