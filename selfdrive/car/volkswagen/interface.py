@@ -121,7 +121,7 @@ class CarInterface(CarInterfaceBase):
     self.pt_cp.update_strings(can_strings)
     self.cam_cp.update_strings(can_strings)
     self.CS.update(self.pt_cp, self.cam_cp)
-    ret.canValid = self.pt_cp.can_valid and self.cam_cp.can_valid
+    ret.canValid = self.pt_cp.can_valid
 
     # Wheel and vehicle speed, yaw rate
     ret.wheelSpeeds.fl = self.CS.wheelSpeedFL
@@ -190,9 +190,7 @@ class CarInterface(CarInterfaceBase):
     if self.CS.parkingBrakeSet:
       events.append(create_event('parkBrake', [ET.NO_ENTRY, ET.USER_DISABLE]))
 
-    # Vehicle health safety checks and events
-    if self.CS.accFault:
-      events.append(create_event('radarFault', [ET.NO_ENTRY, ET.IMMEDIATE_DISABLE]))
+    # Vehicle health and operation safety checks
     if self.CS.steeringFault:
       events.append(create_event('steerTempUnavailable', [ET.NO_ENTRY, ET.WARNING]))
 
