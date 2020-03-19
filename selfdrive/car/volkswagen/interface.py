@@ -44,13 +44,15 @@ class CarInterface(CarInterfaceBase):
       # FIXME: Per-vehicle parameters need to be reintegrated.
       # Until that time, defaulting to VW Golf Mk7 as a baseline.
 
-      ret.mass = 1500 + STD_CARGO_KG
-      ret.wheelbase = 2.64
+      ret.mass = 2100 # Atlas
+      ret.wheelbase = 2.98 # Atlas
       ret.centerToFront = ret.wheelbase * 0.45
-      ret.steerRatio = 15.6
+      ret.steerRatio = 16.3
       ret.lateralTuning.pid.kf = 0.00006
-      ret.lateralTuning.pid.kpV = [0.6]
-      ret.lateralTuning.pid.kiV = [0.2]
+      # ret.lateralTuning.pid.kpV = [0.15, 0.25, 0.30, 0.30, 0.30]
+      # ret.lateralTuning.pid.kiV = [0.05, 0.05, 0.05, 0.05, 0.05]
+      ret.lateralTuning.pid.kpV = [0.4]
+      ret.lateralTuning.pid.kiV = [0.25]
       tire_stiffness_factor = 1.0
 
     ret.enableCamera = True  # Stock camera detection doesn't apply to VW

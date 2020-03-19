@@ -20,7 +20,8 @@ def jpeg_write(fn, dat):
 
 def snapshot():
   params = Params()
-  front_camera_allowed = int(params.get("RecordFront"))
+  # front_camera_allowed = int(params.get("RecordFront"))
+  front_camera_allowed = True
 
   params.put("IsTakingSnapshot", "1")
   params.put("Offroad_IsTakingSnapshot", json.dumps(OFFROAD_ALERTS["Offroad_IsTakingSnapshot"]))

@@ -149,6 +149,7 @@ static void ui_init(UIState *s) {
   s->uilayout_sock = SubSocket::create(s->ctx, "uiLayoutState");
   s->livecalibration_sock = SubSocket::create(s->ctx, "liveCalibration");
   s->radarstate_sock = SubSocket::create(s->ctx, "radarState");
+  s->carstate_sock = SubSocket::create(s->ctx, "carState");
   s->thermal_sock = SubSocket::create(s->ctx, "thermal");
   s->health_sock = SubSocket::create(s->ctx, "health");
   s->ubloxgnss_sock = SubSocket::create(s->ctx, "ubloxGnss");
@@ -157,6 +158,7 @@ static void ui_init(UIState *s) {
   assert(s->controlsstate_sock != NULL);
   assert(s->uilayout_sock != NULL);
   assert(s->livecalibration_sock != NULL);
+  assert(s->carstate_sock != NULL);
   assert(s->radarstate_sock != NULL);
   assert(s->thermal_sock != NULL);
   assert(s->health_sock != NULL);
@@ -168,6 +170,7 @@ static void ui_init(UIState *s) {
                               s->uilayout_sock,
                               s->livecalibration_sock,
                               s->radarstate_sock,
+                              s->carstate_sock,
                               s->thermal_sock,
                               s->health_sock,
                               s->ubloxgnss_sock
@@ -456,6 +459,10 @@ void handle_message(UIState *s, Message * msg) {
     struct cereal_LiveMapData datad;
     cereal_read_LiveMapData(&datad, eventd.liveMapData);
     s->scene.map_valid = datad.mapValid;
+  } else if (eventd.which == cereal_Event_carState) {
+    struct cereal_CarState datad;
+    cereal_read_CarState(&datad, eventd.carState);
+    s->scene.brakeLights = datad.brakeLights;
   } else if (eventd.which == cereal_Event_thermal) {
     struct cereal_ThermalData datad;
     cereal_read_ThermalData(&datad, eventd.thermal);
