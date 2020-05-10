@@ -24,6 +24,9 @@ class CarInterface(CarInterfaceBase):
   def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]):
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint, has_relay)
 
+    # VW port is a community feature, since we don't own one to test
+    ret.communityFeature = True
+
     if candidate == CAR.GENERICMQB:
       # Set common MQB parameters that will apply globally
       ret.carName = "volkswagen"
