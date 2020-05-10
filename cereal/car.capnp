@@ -91,6 +91,10 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     carUnrecognized @66;
     radarCommIssue @67;
     driverMonitorLowAcc @68;
+    invalidLkasSetting @69;
+    speedTooHigh @70;
+    laneChangeBlocked @71;
+    relayMalfunction @72;
   }
 }
 
@@ -151,7 +155,7 @@ struct CarState {
 
   # which packets this state came from
   canMonoTimes @12: List(UInt64);
-  
+
   # blindspot sensors
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
@@ -458,7 +462,7 @@ struct CarParams {
   enum TransmissionType {
     unknown @0;
     automatic @1;  # Traditional auto, including DSG
-    manual @2;	# True "stick shift" only
+    manual @2;  # True "stick shift" only
     direct @3;  # Electric vehicle or other direct drive
   }
 
