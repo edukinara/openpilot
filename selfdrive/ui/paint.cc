@@ -565,7 +565,7 @@ static void ui_draw_vision_event(UIState *s) {
 
 static void ui_draw_vision_map(UIState *s) {
   const int map_size = 96;
-  const int map_x = (s->scene.ui_viz_rx + (map_size * 3) + (bdr_s * 3));
+  const int map_x = (s->scene.ui_viz_rx + (map_size * 5) + (bdr_s * 4));
   const int map_y = (footer_y + ((footer_h - map_size) / 2));
   ui_draw_circle_image(s->vg, map_x, map_y, map_size, s->img_map, s->scene.map_valid);
 }
@@ -575,6 +575,13 @@ static void ui_draw_vision_face(UIState *s) {
   const int face_x = (s->scene.ui_viz_rx + face_size + (bdr_s * 2));
   const int face_y = (footer_y + ((footer_h - face_size) / 2));
   ui_draw_circle_image(s->vg, face_x, face_y, face_size, s->img_face, s->scene.monitoring_active);
+}
+
+static void ui_draw_vision_brake(UIState *s) {
+  const int brake_size = 96;
+  const int brake_x = (s->scene.ui_viz_rx + (brake_size * 3) + (bdr_s * 3));
+  const int brake_y = (footer_y + ((footer_h - brake_size) / 2));
+  ui_draw_circle_image(s->vg, brake_x, brake_y, brake_size, s->img_brake, s->scene.brakeLights);
 }
 
 static void ui_draw_driver_view(UIState *s) {
@@ -657,6 +664,7 @@ static void ui_draw_vision_footer(UIState *s) {
   nvgRect(s->vg, s->scene.ui_viz_rx, footer_y, s->scene.ui_viz_rw, footer_h);
 
   ui_draw_vision_face(s);
+  ui_draw_vision_brake(s);
 
 #ifdef SHOW_SPEEDLIMIT
   // ui_draw_vision_map(s);
@@ -880,6 +888,8 @@ void ui_nvg_init(UIState *s) {
   assert(s->img_face != 0);
   s->img_map = nvgCreateImage(s->vg, "../assets/img_map.png", 1);
   assert(s->img_map != 0);
+  s->img_brake = nvgCreateImage(s->vg, "../assets/img_brake_disc.png", 1);
+  assert(s->img_brake != 0);
   s->img_button_settings = nvgCreateImage(s->vg, "../assets/images/button_settings.png", 1);
   assert(s->img_button_settings != 0);
   s->img_button_home = nvgCreateImage(s->vg, "../assets/images/button_home.png", 1);

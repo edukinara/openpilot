@@ -221,6 +221,7 @@ static void ui_init(UIState *s) {
   s->uilayout_sock = SubSocket::create(s->ctx, "uiLayoutState");
   s->livecalibration_sock = SubSocket::create(s->ctx, "liveCalibration");
   s->radarstate_sock = SubSocket::create(s->ctx, "radarState");
+  s->carstate_sock = SubSocket::create(s->ctx, "carState");
   s->thermal_sock = SubSocket::create(s->ctx, "thermal");
   s->health_sock = SubSocket::create(s->ctx, "health");
   s->ubloxgnss_sock = SubSocket::create(s->ctx, "ubloxGnss");
@@ -233,6 +234,7 @@ static void ui_init(UIState *s) {
   assert(s->uilayout_sock != NULL);
   assert(s->livecalibration_sock != NULL);
   assert(s->radarstate_sock != NULL);
+  assert(s->carstate_sock != NULL);
   assert(s->thermal_sock != NULL);
   assert(s->health_sock != NULL);
   assert(s->ubloxgnss_sock != NULL);
@@ -246,6 +248,7 @@ static void ui_init(UIState *s) {
                               s->uilayout_sock,
                               s->livecalibration_sock,
                               s->radarstate_sock,
+                              s->carstate_sock,
                               s->thermal_sock,
                               s->health_sock,
                               s->ubloxgnss_sock,
@@ -482,6 +485,8 @@ void handle_message(UIState *s,  Message* msg) {
     }
   } else if (which == cereal::Event::LIVE_MAP_DATA) {
     scene.map_valid = event.getLiveMapData().getMapValid();
+  } else if (which == cereal::Event::CAR_STATE) {
+    scene.brakeLights = event.getCarState().getBrakeLights();
   } else if (which == cereal::Event::THERMAL) {
     auto data = event.getThermal();
 
