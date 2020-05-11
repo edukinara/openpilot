@@ -91,6 +91,12 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     carUnrecognized @66;
     radarCommIssue @67;
     driverMonitorLowAcc @68;
+    invalidLkasSetting @69;
+    speedTooHigh @70;
+    laneChangeBlocked @71;
+    relayMalfunction @72;
+    gasPressed @73;
+    stockFcw @74;
   }
 }
 
@@ -119,12 +125,14 @@ struct CarState {
   brakeLights @19 :Bool;
 
   # steering wheel
-  steeringAngle @7 :Float32;   # deg
-  steeringRate @15 :Float32;   # deg/s
-  steeringTorque @8 :Float32;  # TODO: standardize units
+  steeringAngle @7 :Float32;       # deg
+  steeringRate @15 :Float32;       # deg/s
+  steeringTorque @8 :Float32;      # TODO: standardize units
   steeringTorqueEps @27 :Float32;  # TODO: standardize units
-  steeringPressed @9 :Bool;    # if the user is using the steering wheel
-  steeringRateLimited @29 :Bool;    # if the torque is limited by the rate limiter
+  steeringPressed @9 :Bool;        # if the user is using the steering wheel
+  steeringRateLimited @29 :Bool;   # if the torque is limited by the rate limiter
+  steerWarning @35 :Bool;          # temporary steer unavailble
+  steerError @36 :Bool;            # permanent steer error
   stockAeb @30 :Bool;
   stockFcw @31 :Bool;
   espDisabled @32 :Bool;
@@ -151,7 +159,7 @@ struct CarState {
 
   # which packets this state came from
   canMonoTimes @12: List(UInt64);
-  
+
   # blindspot sensors
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
@@ -309,6 +317,7 @@ struct CarControl {
       chimeWarning2 @5;
       chimeWarningRepeat @6;
       chimePrompt @7;
+      chimeWarning2Repeat @8;
     }
   }
 }
@@ -458,7 +467,7 @@ struct CarParams {
   enum TransmissionType {
     unknown @0;
     automatic @1;  # Traditional auto, including DSG
-    manual @2;	# True "stick shift" only
+    manual @2;  # True "stick shift" only
     direct @3;  # Electric vehicle or other direct drive
   }
 
