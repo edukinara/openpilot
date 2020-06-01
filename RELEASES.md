@@ -1,5 +1,9 @@
-Version 0.7.4 + VW 1.3 (2020-03-18)
+Version 0.7.4 + VW 1.3 (2020-04-17)
 ========================
+ * (VW Community) Hotfix for SEAT Ateca missing CAN messages
+ * (VW Community) Hotfix for manual trans users
+ * (VW Community) Hotfix to add missing CAN messages from VW Touran
+ * (VW Community) Hotfix to add missing CAN messages from high-trim Skoda Superb
  * (VW Community) Network position auto-detect, no more R242 vs J533 branch!
  * (VW Community) Trans type auto-detect, no more regular vs manual/e-Golf branch!
  * (VW Community) Now fully in-sync with Comma upstream safety at full torque!
